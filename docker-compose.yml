@@ -60,6 +60,9 @@ services:
       - SETGID
       - KILL
 
+    # Fork-bomb insurance: a runaway Box process cannot exhaust host PIDs.
+    pids_limit: 4096
+
 volumes:
   squarebox-home:
     # An explicit name keeps lifecycle commands and Compose on the same

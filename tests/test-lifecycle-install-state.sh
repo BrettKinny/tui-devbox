@@ -651,6 +651,7 @@ export SQUAREBOX_DIR="$TMP/podman" SQUAREBOX_RUNTIME=podman SQUAREBOX_TAG=v1.1.0
 "$ROOT/install.sh" </dev/null
 grep -q -- '--security-opt label=disable' "$MOCK_RUNTIME/calls"
 grep -q -- '--userns=keep-id:uid=1000,gid=1000' "$MOCK_RUNTIME/calls"
+grep -q -- '--pids-limit=4096' "$MOCK_RUNTIME/calls"
 ! grep -Eq '(^|,|:)Z([,[:space:]]|$)' "$MOCK_RUNTIME/calls"
 
 export MOCK_RUNTIME="$TMP/runtime-podman-bad-id"; mkdir -p "$MOCK_RUNTIME"

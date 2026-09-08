@@ -56,6 +56,7 @@ $install = [IO.File]::ReadAllText((Join-Path $Root 'install.ps1'))
 $uninstall = [IO.File]::ReadAllText((Join-Path $Root 'uninstall.ps1'))
 Assert-True ($install.Contains('--userns=keep-id:uid=1000,gid=1000')) 'rootless Podman does not map host identity to dev'
 Assert-True ($install.Contains("'--security-opt', 'label=disable'")) 'Podman does not disable private SELinux relabeling'
+Assert-True ($install.Contains("'--pids-limit=4096'")) 'installer does not bound Box PID exhaustion'
 Assert-True (-not ($install -match ':ro,Z|BindSuffix.*:Z')) 'PowerShell adapter still emits private :Z binds'
 Assert-True ($install.Contains('$HomeVolume -cne $State.HOME_VOLUME')) 'Managed-home identity comparison is not case-sensitive'
 Assert-True ($install.Contains('$owner.Trim() -cne ''__INSTALL_ID__''')) 'generated adapter case-folds Install identity'

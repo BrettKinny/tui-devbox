@@ -226,9 +226,10 @@ does not contain that server. The upstream Feature enables root login in its
 SSHD configuration, but Squarebox publishes no SSH host port or password, and
 restricts remote-forwarded listeners to loopback.
 
-Linux capabilities are reduced, but the Box has network access and the host
-resources explicitly mounted by its Install identity. Treat code and tools run
-inside it as having access to:
+Linux capabilities are reduced, and the Box is bounded to 4096 PIDs so a
+runaway process cannot exhaust the host's process table. The Box has network
+access and the host resources explicitly mounted by its Install identity.
+Treat code and tools run inside it as having access to:
 
 - the Workspace, read-write;
 - the Managed home, including persisted tool credentials;
