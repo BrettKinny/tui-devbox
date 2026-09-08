@@ -777,7 +777,7 @@ Add-Seed 'multiplexer' $env:SQUAREBOX_MULTIPLEXERS 'multiplexers'
 $RuntimeOptions = @(
     '--label', "$ManagedLabel=true", '--label', "$IdentityLabel=$InstallId",
     '--cap-drop=ALL', '--cap-add=CHOWN', '--cap-add=DAC_OVERRIDE', '--cap-add=FOWNER',
-    '--cap-add=SETUID', '--cap-add=SETGID', '--cap-add=KILL',
+    '--cap-add=SETUID', '--cap-add=SETGID', '--cap-add=KILL', '--pids-limit=4096',
     '-e', "PUID=$Puid", '-e', "PGID=$Pgid"
 )
 $BindSuffix = ''; $ReadOnlyBindSuffix = ':ro'

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Lifecycle adapters and Compose bound the Box to 4096 PIDs
+  (`--pids-limit=4096` / `pids_limit`), so a runaway Box process cannot
+  exhaust the host process table.
+
 ## v1.2.1 — 2026-07-31
 
 v1.2.0 was built as a draft Candidate but was never published after final

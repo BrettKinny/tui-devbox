@@ -850,7 +850,8 @@ seed multiplexer "${SQUAREBOX_MULTIPLEXERS:-}" multiplexers
 bind_mode=""; ro_bind_mode=ro
 RT_OPTS=(--label "$MANAGED_LABEL=true" --label "$IDENTITY_LABEL=$INSTALL_ID"
 	--cap-drop=ALL --cap-add=CHOWN --cap-add=DAC_OVERRIDE --cap-add=FOWNER
-	--cap-add=SETUID --cap-add=SETGID --cap-add=KILL -e "PUID=$PUID" -e "PGID=$PGID")
+	--cap-add=SETUID --cap-add=SETGID --cap-add=KILL --pids-limit=4096
+	-e "PUID=$PUID" -e "PGID=$PGID")
 if [ "$RUNTIME" = podman ]; then
 	# This development Box mounts a host Workspace, managed configuration,
 	# system time, and optionally SSH material. A private :Z relabel would make

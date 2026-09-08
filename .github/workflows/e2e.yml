@@ -527,6 +527,7 @@ jobs:
             --security-opt label=disable \
             --cap-drop=ALL --cap-add=CHOWN --cap-add=DAC_OVERRIDE \
             --cap-add=FOWNER --cap-add=SETUID --cap-add=SETGID --cap-add=KILL \
+            --pids-limit=4096 \
             -e PUID="$(id -u)" -e PGID="$(id -g)" \
             -v "$workspace:/workspace" -v "$home_volume:/home/dev" \
             "$IMAGE@$DIGEST" sleep infinity
