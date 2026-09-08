@@ -1019,7 +1019,7 @@ _shell_init_tmp="$(mktemp "${SHELL_INIT}.sqrbx.XXXXXX")"
 	printf '# squarebox-install-id=%s\n# Managed by squarebox from %q.\n' "$INSTALL_ID" "$STATE_FILE"
 	printf '_sq_install=%s\n_sq_runtime=%s\n_sq_container=%s\n_sq_install_id=%s\n' "$_q_install" "$_q_runtime" "$_q_container" "$_q_install_id"
 	cat <<'EOF'
-unalias sqrbx squarebox sqrbx-rebuild squarebox-rebuild sqrbx-uninstall squarebox-uninstall 2>/dev/null || true
+unalias sqrbx squarebox sqrbx-agent sqrbx-rebuild squarebox-rebuild sqrbx-uninstall squarebox-uninstall 2>/dev/null || true
 _sq_rt() {
   if [ -n "${MSYSTEM:-}" ]; then MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*' "${_sq_runtime}" "$@"
   else "${_sq_runtime}" "$@"
@@ -1045,6 +1045,7 @@ sqrbx() {
   _sq_rt_interactive start -ai "${_sq_container}"
 }
 squarebox() { sqrbx "$@"; }
+sqrbx-agent() { "${_sq_install}/scripts/sqrbx-agent" "$@"; }
 sqrbx-rebuild() { "${_sq_install}/install.sh" "$@"; }
 squarebox-rebuild() { sqrbx-rebuild "$@"; }
 sqrbx-uninstall() { "${_sq_install}/uninstall.sh" "$@"; }

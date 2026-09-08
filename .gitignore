@@ -28,3 +28,4 @@ workspace/
 # OS files
 Thumbs.db
 .claude/settings.local.json
+node_modules/

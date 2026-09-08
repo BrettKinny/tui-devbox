@@ -1,0 +1,10 @@
+{
+  "name": "squarebox-agent-host",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "dependencies": {
+    "@earendil-works/pi-coding-agent": "0.85.1",
+    "@earendil-works/pi-ai": "0.85.1"
+  }
+}

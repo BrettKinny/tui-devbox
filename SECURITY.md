@@ -214,6 +214,8 @@ GitHub's digest is an integrity snapshot, not an independent publisher signature
 
 ## Container authority and isolation
 
+### Normal Squarebox: trusted development environment
+
 The Box is a development environment, not a hostile-code security sandbox.
 The `dev` user can invoke passwordless package-management/install commands.
 `dpkg` maintainer scripts and `install` can provide effective root authority
@@ -299,6 +301,71 @@ PUID="$(id -u)" PGID="$(id -g)" "$SQUAREBOX_DIR/install.sh"
 
 Do not replace these resolved paths with the home directory, the install root,
 or another broad recursive target.
+
+### sqrbx-agent: hardened agent execution profile
+
+[`sqrbx-agent`](docs/agent.md) is a separate Linux host command. Its initial
+backend is explicitly selected rootless Podman, which shares the host kernel.
+Gondolin would provide a micro-VM boundary; it is not implemented or claimed as
+tested in this milestone. Requesting it fails instead of selecting Podman.
+
+The host Pi runtime, pinned SDK dependencies, adapter, host OS, runtime, and
+selected immutable image are trusted. The model's tool requests, project code,
+instruction files, and dependencies are untrusted. A compromised host Pi
+process is not contained by this architecture. No `AGENTS.md` rule substitutes
+for enforcement. The adapter exposes only tools routed through the backend,
+without automatic project or ordinary Pi extension discovery.
+
+The guest receives an independent repository at `/workspace`, not the original
+checkout or its common Git directory. Only committed source is copied; the
+original working files and refs are not modified. Session identity and trusted
+reporting metadata remain outside the guest mount. Treat retained workspace
+files, including `.git` and package scripts, as hostile after execution; use
+the host-controlled inspection command and review before importing or running
+anything in your normal environment.
+
+The profile runs unprivileged, drops all capabilities, enables
+no-new-privileges, keeps the root filesystem read-only, and uses temporary
+home/scratch mounts. The normal entrypoint and Selection reconciliation do not
+run. No Managed home, host home, SSH files/agent, GitHub credentials, real Git
+config, model credentials, or runtime sockets are mounted or forwarded. Private
+SELinux labeling applies only to the independent workspace; agent mode does
+not disable label separation. Tracked secrets already in the selected commit
+remain visible to the agent, as do any files the user explicitly places there.
+
+`--network none` is the default. `development` fails because this Podman
+implementation has no enforceable destination policy. `open` is an explicit
+opt-in and permits exfiltration and access to reachable services, including
+potentially local-network services. Host-side Pi can still contact the selected
+model provider with guest networking disabled: that provider is an authorized
+recipient of source and tool output. This is not a guarantee that source stays
+on the machine, nor does a hostname allowlist alone prevent data leakage.
+
+Guest homes and execution state are discarded when execution stops. Repository
+files persist until explicitly discarded, so files written into `/workspace`
+can persist across resumed sessions. Resource limits bound CPU, memory, and
+process counts; workspace disk usage is not quota-limited. Host kernel/runtime
+vulnerabilities, malicious output presented for review, exhausted host storage,
+and malicious changes subsequently run by a human are residual risks. This is
+defense in depth, not absolute sandboxing. See the
+[architecture decision](docs/adr/0010-isolate-agent-execution-from-the-box.md).
+
+### GitHub review controls
+
+The repository's `Protect main` ruleset was inspected on 2026-09-07. It requires
+pull requests, resolved review threads, and the existing status checks, with no
+bypass actors. It currently requires zero approving reviews and does not
+require CODEOWNER review or approval of the latest push.
+
+An administrator should require one approving review, approval of the latest
+push, and CODEOWNER review for sensitive paths. Retain resolved-thread
+enforcement, existing status checks, and no bypass actors. `.github/CODEOWNERS`
+assigns sensitive paths to `@BrettKinny` and `@TheBobFella`, whose repository
+write access was verified. An owner cannot approve their own PR; the other
+owner must review sensitive changes. These
+settings are recommendations; this change does not modify them. Keep existing
+release-tag protection, immutable releases, and stable release environment
+approval intact; the release automation does not need a main-branch bypass.
 
 ## Safe lifecycle deletion
 

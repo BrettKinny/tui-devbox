@@ -49,6 +49,9 @@ grep -q 'Selection state directory must not be a symlink' install.sh
 grep -q 'Selection state directory must not be a reparse point or symlink' install.ps1
 grep -q '\[ "$WINDOWS_BASH" = 1 \] || return 1' install.sh uninstall.sh
 grep -q -- '--userns=keep-id:uid=1000,gid=1000' install.sh
+grep -q 'sqrbx-agent()' install.sh
+test -x scripts/sqrbx-agent
+test -x tests/test-agent.sh
 grep -q -- '--security-opt label=disable' install.sh
 ! grep -q 'ro,Z\|bind_mode=Z' install.sh
 grep -q -- '--userns=keep-id:uid=1000,gid=1000' install.ps1

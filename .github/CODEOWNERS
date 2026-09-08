@@ -1,0 +1,14 @@
+# Owners must have write access. Enforce CODEOWNER review in Protect main.
+/.github/CODEOWNERS @BrettKinny @TheBobFella
+/.github/workflows/ @BrettKinny @TheBobFella
+/Dockerfile @BrettKinny @TheBobFella
+/install.sh @BrettKinny @TheBobFella
+/install.ps1 @BrettKinny @TheBobFella
+/uninstall.sh @BrettKinny @TheBobFella
+/uninstall.ps1 @BrettKinny @TheBobFella
+/scripts/squarebox-entrypoint.sh @BrettKinny @TheBobFella
+/scripts/release-* @BrettKinny @TheBobFella
+/scripts/lib/tool-lib.sh @BrettKinny @TheBobFella
+/scripts/agent/ @BrettKinny @TheBobFella
+/scripts/sqrbx-agent @BrettKinny @TheBobFella
+/SECURITY.md @BrettKinny @TheBobFella

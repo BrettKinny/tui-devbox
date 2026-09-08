@@ -28,3 +28,4 @@ workspace/
 *.sublime-project
 *.sublime-workspace
 Thumbs.db
+node_modules/

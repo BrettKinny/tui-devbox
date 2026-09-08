@@ -19,6 +19,12 @@ One-line install, interactive first-run setup, sensible defaults (thanks
 Preparing an existing installation for v1.2? Read the
 [migration guide](docs/releases/v1.2.1.md) and [changelog](CHANGELOG.md).
 
+For host-side Pi with isolated tool execution, see
+[`sqrbx-agent`](docs/agent.md). This separate Linux profile uses an independent
+session repository, disposable home, and explicit rootless Podman backend with
+networking disabled by default. The normal Box remains a trusted development
+environment.
+
 ![squarebox first-run setup](demo/squarebox-setup.gif)
 *(Actual setup may involve more staring at the screen.)*
 
