@@ -1,9 +1,9 @@
-# Squarebox v1.2.1 release checks
+# Squarebox release checks
 
 Automated release assertions are defined in `scripts/e2e-required.tsv` and
 reported from exact Evidence by `.github/workflows/e2e.yml`. That automated
-Candidate workflow is the v1.2.1 release gate. A per-platform manual
-qualification matrix is not required for this release.
+Candidate workflow is the release gate. A per-platform manual qualification
+matrix is not required.
 
 Native PowerShell remains a separate adapter and does not claim `SSH_AUTH_SOCK` forwarding;
 adapter boundaries are covered by automated/static checks.
@@ -21,10 +21,6 @@ adapter boundaries are covered by automated/static checks.
 
 Record the Candidate version, source SHA, image digest, and result for any
 optional follow-up run.
-
-Release tracker: [v1.2.1 #125](https://github.com/SquareWaveSystems/squarebox/issues/125).
-Optional primary-Linux follow-up: [#126](https://github.com/SquareWaveSystems/squarebox/issues/126).
-Final Candidate and publication: [#131](https://github.com/SquareWaveSystems/squarebox/issues/131).
 
 ## Optional primary-Linux follow-up
 
@@ -44,7 +40,7 @@ Final Candidate and publication: [#131](https://github.com/SquareWaveSystems/squ
 - [ ] Download the non-discoverable draft assets with authenticated `gh release download` and verify their hashes and Cosign identity signature
 - [ ] Run the automated Candidate suite and confirm all required Evidence passes
 - [ ] Confirm stable installers cannot discover the Release until all gates pass
-- [ ] Record the qualification evidence and explicit promote/no-promote decision in [issue #131](https://github.com/SquareWaveSystems/squarebox/issues/131)
+- [ ] Record the qualification evidence and explicit promote/no-promote decision in the release tracker
 - [ ] Approve the waiting `stable-release` environment deployment to publish the tested Candidate without rebuilding different image bytes
 - [ ] After publication, run `gh release verify <tag>` and confirm GitHub reports a valid immutable-Release attestation
 - [ ] Confirm GitHub Release and GHCR `latest` identify the greatest published stable version
