@@ -1,5 +1,34 @@
 # Changelog
 
+## Unreleased (v1.3 candidate)
+
+### Added
+
+- Explicit, transactional conversion between native PowerShell and Git Bash
+  lifecycle adapters without changing the Box, image, Workspace, or Managed home.
+- Recoverable Box replacement: handled late failures restore the prior runnable
+  Box and its recorded Install identity.
+- A mechanically verified, shared Install identity schema contract for the Bash
+  and PowerShell adapters.
+- Trust-explicit `*-yolo` aliases for installed AI assistants.
+
+### Changed
+
+- Herdr uses terminal-safe direct shortcuts while retaining `F12` as a
+  compatibility prefix.
+- The selected default shell is exported consistently to child processes.
+
+See the [v1.3 migration guide](docs/releases/v1.3.0.md).
+
+## v1.2.3 — 2026-08-05
+
+- Suppressed Squarebox's MOTD inside Herdr-managed panes.
+
+## v1.2.2 — 2026-08-05
+
+- Fixed Rust SDK detection so an installed toolchain is not repeatedly
+  reconciled as missing.
+
 ## v1.2.1 — 2026-07-31
 
 v1.2.0 was built as a draft Candidate but was never published after final
