@@ -13,8 +13,7 @@ tablet, or phone (please don't).
 
 A playground for modern CLI/TUI tools, a Box for
 running AI agents, and a persistent terminal environment for remote development.
-One-line install, interactive first-run setup, sensible defaults (thanks
-[omarchy](https://omarchy.org)).
+One-line install, interactive first-run setup, sensible defaults.
 
 Upgrading an existing installation? Read the relevant
 [migration guide](docs/releases/) and [changelog](CHANGELOG.md).
