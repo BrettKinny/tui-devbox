@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Setup offers PowerShell 7 (`pwsh`) as an alternative default shell, installed
+  from Microsoft's GitHub release `.deb` after its release-asset SHA-256 is
+  verified. A managed `~/.config/powershell/profile.ps1` mirrors the bashrc
+  (starship, zoxide, mise, aliases) and a `~/.squarebox-use-pwsh` marker hands
+  interactive logins off to pwsh, matching the existing Zsh/Fish flow.
+
 ## v1.2.1 — 2026-07-31
 
 v1.2.0 was built as a draft Candidate but was never published after final

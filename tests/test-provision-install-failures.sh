@@ -16,9 +16,21 @@ assert_true() { if eval "$1"; then ok "$2"; else not_ok "$2"; fi; }
 # observed success.
 FIXTURE_BIN="$TMP/bin"
 mkdir -p "$FIXTURE_BIN"
-for utility in awk bash chmod grep jq mkdir mktemp rm sed sha256sum touch tr; do
+for utility in awk bash chmod grep jq mkdir mktemp rm sed sha256sum touch tr uname; do
 	ln -s "$(command -v "$utility")" "$FIXTURE_BIN/$utility"
 done
+
+# PowerShell fixture: a real release-like asset whose SHA-256 the fixture
+# metadata declares. Name matches the runner architecture so the installer's
+# asset selection resolves on both amd64 and arm64 CI.
+PWSH_FAKE_DEB="$TMP/pwsh-fixture.deb"
+printf 'fixture powershell deb\n' > "$PWSH_FAKE_DEB"
+PWSH_FAKE_SHA=$(sha256sum "$PWSH_FAKE_DEB" | awk '{print $1}')
+case "$(uname -m)" in
+	x86_64|amd64) PWSH_FAKE_ASSET="powershell_7.6.5-1.deb_amd64.deb" ;;
+	aarch64|arm64) PWSH_FAKE_ASSET="powershell_7.6.5-1.deb_arm64.deb" ;;
+	*) PWSH_FAKE_ASSET="" ;;
+esac
 
 # Fault-inject setup-owned atomic file publication without changing setup's
 # public entry point. `cat` can emit a matching heredoc's first line and then
@@ -97,8 +109,18 @@ cat > "$FIXTURE_LIB" <<-'TOOL_LIB'
 			esac
 			return 0
 		fi
-		if [ "${SB_METADATA_MODE:-fail}" = success ]; then
+		if [ "${SB_METADATA_MODE:-fail}" = success ] || [ "${SB_METADATA_MODE:-fail}" = digest-wrong ]; then
 			case "$url" in
+				*/repos/PowerShell/PowerShell/releases/latest)
+					local pwsh_digest
+					pwsh_digest="${PWSH_FAKE_SHA:-0000000000000000000000000000000000000000000000000000000000000000}"
+					if [ "${SB_METADATA_MODE:-fail}" = digest-wrong ]; then
+						pwsh_digest="0000000000000000000000000000000000000000000000000000000000000000"
+					fi
+					printf '{"tag_name":"v7.6.5","assets":[{"name":"%s","digest":"sha256:%s","browser_download_url":"https://github.com/PowerShell/PowerShell/releases/download/v7.6.5/%s"}]}\n' \
+						"$PWSH_FAKE_ASSET" "$pwsh_digest" "$PWSH_FAKE_ASSET"
+					return 0
+					;;
 				*/repos/LazyVim/starter) printf '{"default_branch":"lazyvim-default"}\n' ;;
 				*/repos/LazyVim/starter/commits/lazyvim-default) printf '{"sha":"4444444444444444444444444444444444444444"}\n' ;;
 				*/repos/ohmyzsh/ohmyzsh) printf '{"default_branch":"omz-default"}\n' ;;
@@ -142,7 +164,12 @@ run_selected_section() {
 		MISE_CALLS="$case_dir/mise.calls" \
 		MISE_MODE="${MISE_MODE:-}" \
 		MISE_RUST_INSTALLED="$case_dir/rust.installed" \
+		APT_CALLS="$case_dir/apt.calls" \
 		FAKE_GUM_SELECTION="$selection" \
+		PWSH_FAKE_DEB="$PWSH_FAKE_DEB" \
+		PWSH_FAKE_SHA="$PWSH_FAKE_SHA" \
+		PWSH_FAKE_ASSET="$PWSH_FAKE_ASSET" \
+		FIXTURE_BIN="$FIXTURE_BIN" \
 		PATH="$FIXTURE_BIN" \
 		/usr/bin/script -qec "/bin/bash '$ROOT/setup.sh' --rerun '$section'" /dev/null \
 		>"$case_dir/setup.out" 2>&1
@@ -315,6 +342,18 @@ ZSH
 cat > "$FIXTURE_BIN/curl" <<-'CURL'
 	#!/bin/bash
 	printf 'curl %s\n' "$*" >> "$NETWORK_CALLS"
+	case "$*" in
+		*"$PWSH_FAKE_ASSET"*)
+			out=""
+			while [ "$#" -gt 0 ]; do
+				if [ "$1" = -o ]; then shift; out="$1"; fi
+				shift
+			done
+			[ -n "$out" ] || exit 23
+			cat "$PWSH_FAKE_DEB" > "$out"
+			exit 0
+			;;
+	esac
 	exit 23
 CURL
 cat > "$FIXTURE_BIN/git" <<-'GIT'
@@ -367,6 +406,31 @@ cat > "$FIXTURE_BIN/git" <<-'GIT'
 	exit 46
 GIT
 chmod +x "$FIXTURE_BIN/zsh" "$FIXTURE_BIN/curl" "$FIXTURE_BIN/git"
+
+# PowerShell installs through apt_install (tzdata hold + update + install).
+# Fake the passwordless sudo contract and record the install; on a successful
+# `apt-get install`, expose an observed `pwsh` so the installer's post-install
+# probe and marker/Selection commit can complete without dpkg.
+cat > "$FIXTURE_BIN/sudo" <<-'SUDO'
+	#!/bin/bash
+	[ "${1:-}" = -n ] && shift
+	exec "$@"
+SUDO
+cat > "$FIXTURE_BIN/apt-get" <<-'APTG'
+	#!/bin/bash
+	printf 'apt-get %s\n' "$*" >> "$APT_CALLS"
+	case "${1:-}" in
+		update) exit 0 ;;
+		install)
+			printf '#!/bin/bash\nexit 0\n' > "$FIXTURE_BIN/pwsh"
+			chmod +x "$FIXTURE_BIN/pwsh"
+			exit 0
+			;;
+		*) exit 49 ;;
+	esac
+APTG
+printf '#!/bin/bash\nexit 0\n' > "$FIXTURE_BIN/apt-mark"
+chmod +x "$FIXTURE_BIN/sudo" "$FIXTURE_BIN/apt-get" "$FIXTURE_BIN/apt-mark"
 
 # LazyVim uses an immutable default-branch SHA, resolved before compiler or
 # Managed-home mutation, and verifies HEAD before publishing the starter tree.
@@ -439,6 +503,45 @@ printf 'https://github.com/ohmyzsh/ohmyzsh.git\n' > "$ZSH_DIRTY_CASE/home/.oh-my
 run_selected_section shell 'zsh (experimental)' "$ZSH_DIRTY_CASE" 42 success expected dirty
 assert_true "[ \"\$(cat '$ZSH_DIRTY_CASE/setup.rc')\" -ne 0 ] && grep -q 'preserving local changes' '$ZSH_DIRTY_CASE/setup.out'" \
 	"Zsh reconciliation preserves and refuses to mix local source changes"
+
+# PowerShell resolves GitHub release metadata (and its release-asset SHA-256)
+# before downloading or installing. A metadata failure must abort before any
+# download or Managed-home mutation, a digest mismatch must reject the asset,
+# and only a verified install may activate pwsh and commit the Selection.
+if [ -n "$PWSH_FAKE_ASSET" ]; then
+	PWSH_METADATA_FAILURE_CASE="$TMP/pwsh-metadata-failure"
+	run_selected_section shell 'powershell (experimental)' "$PWSH_METADATA_FAILURE_CASE"
+	assert_true "[ \"\$(cat '$PWSH_METADATA_FAILURE_CASE/setup.rc')\" -ne 0 ]" \
+		"PowerShell setup propagates GitHub metadata failure"
+	assert_true "[ ! -e '$PWSH_METADATA_FAILURE_CASE/network.calls' ]" \
+		"PowerShell metadata failure aborts before any download"
+	assert_true "[ ! -e '$PWSH_METADATA_FAILURE_CASE/home/.squarebox-use-pwsh' ] && [ ! -e '$PWSH_METADATA_FAILURE_CASE/state/shell' ] && [ ! -e '$PWSH_METADATA_FAILURE_CASE/home/.config/powershell/profile.ps1' ]" \
+		"PowerShell metadata failure aborts before Managed-home mutation or Selection commit"
+	assert_true "grep -q 'fixture GitHub metadata failure' '$PWSH_METADATA_FAILURE_CASE/setup.out'" \
+		"PowerShell metadata failure remains visible"
+
+	PWSH_DIGEST_MISMATCH_CASE="$TMP/pwsh-digest-mismatch"
+	run_selected_section shell 'powershell (experimental)' "$PWSH_DIGEST_MISMATCH_CASE" 42 digest-wrong
+	assert_true "[ \"\$(cat '$PWSH_DIGEST_MISMATCH_CASE/setup.rc')\" -ne 0 ]" \
+		"PowerShell digest mismatch rejects the release asset"
+	assert_true "grep -q 'curl -fsSL' '$PWSH_DIGEST_MISMATCH_CASE/network.calls'" \
+		"PowerShell digest check runs after download"
+	assert_true "grep -q 'SHA-256 mismatch' '$PWSH_DIGEST_MISMATCH_CASE/setup.out'" \
+		"PowerShell digest mismatch remains visible"
+	assert_true "[ ! -e '$PWSH_DIGEST_MISMATCH_CASE/home/.squarebox-use-pwsh' ] && [ ! -e '$PWSH_DIGEST_MISMATCH_CASE/state/shell' ] && [ ! -e '$PWSH_DIGEST_MISMATCH_CASE/home/.config/powershell/profile.ps1' ]" \
+		"PowerShell digest mismatch cannot activate the shell or commit a Selection"
+
+	PWSH_SUCCESS_CASE="$TMP/pwsh-success"
+	run_selected_section shell 'powershell (experimental)' "$PWSH_SUCCESS_CASE" 42 success
+	assert_true "[ \"\$(cat '$PWSH_SUCCESS_CASE/setup.rc')\" -eq 0 ] && [ \"\$(cat '$PWSH_SUCCESS_CASE/state/shell')\" = pwsh ]" \
+		"PowerShell setup succeeds from verified release metadata and commits pwsh"
+	assert_true "[ -e '$PWSH_SUCCESS_CASE/home/.squarebox-use-pwsh' ] && [ ! -e '$PWSH_SUCCESS_CASE/home/.squarebox-use-zsh' ] && [ ! -e '$PWSH_SUCCESS_CASE/home/.squarebox-use-fish' ]" \
+		"PowerShell activation marker is exclusive"
+	assert_true "grep -Fq '# squarebox pwsh config' '$PWSH_SUCCESS_CASE/home/.config/powershell/profile.ps1' && grep -Fq 'squarebox-selections.ps1' '$PWSH_SUCCESS_CASE/home/.config/powershell/profile.ps1'" \
+		"PowerShell generates a managed profile that sources the selection snippet"
+	assert_true "grep -Fq 'apt-get install' '$PWSH_SUCCESS_CASE/apt.calls'" \
+		"PowerShell installs through the verified local .deb"
+fi
 
 printf '1..%d\n' "$((PASS + FAIL))"
 [ "$FAIL" -eq 0 ]

@@ -79,4 +79,12 @@ if [ -f ~/.squarebox-use-fish ] && [ -z "${SQUAREBOX_IN_FISH:-}" ] && [ -z "${SQ
 	exec fish -l
 fi
 
+# Hand off to PowerShell if the user opted in via setup.sh (experimental).
+# SQUAREBOX_IN_PWSH guards against re-exec loops; SQUAREBOX_NO_PWSH lets
+# users force bash for one shell without removing the marker.
+if [ -f ~/.squarebox-use-pwsh ] && [ -z "${SQUAREBOX_IN_PWSH:-}" ] && [ -z "${SQUAREBOX_NO_PWSH:-}" ] && command -v pwsh >/dev/null 2>&1; then
+	export SQUAREBOX_IN_PWSH=1
+	exec pwsh -l
+fi
+
 [ -x /usr/local/lib/squarebox/motd.sh ] && /usr/local/lib/squarebox/motd.sh

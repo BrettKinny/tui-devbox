@@ -143,7 +143,7 @@ done <<< "$selected"
 echo
 section_header "Shell"
 selected=$(gum choose --header "Select the default shell:" \
-    "bash" "zsh (experimental)" "fish (experimental)") || true
+    "bash" "zsh (experimental)" "fish (experimental)" "powershell (experimental)") || true
 [ -n "$selected" ] && run_with_spinner "Configuring ${selected}..." 0.7
 
 echo

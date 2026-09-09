@@ -132,6 +132,10 @@ box_reconcile_needed() {
 		command -v fish >/dev/null 2>&1 || return 0
 		[ -f "$managed_home/.config/fish/config.fish" ] || return 0
 	fi
+	if selection_contains "$state/shell" pwsh; then
+		command -v pwsh >/dev/null 2>&1 || return 0
+		[ -f "$managed_home/.config/powershell/profile.ps1" ] || return 0
+	fi
 	return 1
 }
 
