@@ -304,7 +304,7 @@ Installed during first-run setup. Choose any combination, or none:
 ### Shell (Experimental)
 
 By default, squarebox uses Bash. During first-run setup you can opt in to
-**Zsh** or **Fish** instead.
+**Zsh**, **Fish**, or **PowerShell** instead.
 
 **Zsh** installs:
 
@@ -324,14 +324,24 @@ autosuggestions and syntax highlighting built in. The generated
 AI/editor/TUI/SDK selections are translated from their bash files into
 `~/.config/fish/conf.d/squarebox-selections.fish` at setup time.
 
-> **Experimental:** the marker file `~/.squarebox-use-zsh` (or
-> `~/.squarebox-use-fish`) causes `~/.bashrc` to `exec` the chosen shell on
-> every interactive login, so the next shell start picks up the new shell.
-> Set `SQUAREBOX_NO_ZSH=1` or `SQUAREBOX_NO_FISH=1` to force bash for a single
-> session, or re-run `sqrbx-setup shell` to switch back permanently. Tooling
-> is primarily tested against bash, so a few edge cases may need polish —
-> please file an issue if you hit one. SDK shims are wired into all three
-> shells via `mise activate {bash,zsh,fish}`.
+**PowerShell** installs PowerShell 7 (`pwsh`) from Microsoft's official
+[GitHub release](https://github.com/PowerShell/PowerShell/releases) `.deb`
+(asset SHA-256 verified against the release metadata before install). The
+generated `~/.config/powershell/profile.ps1` mirrors the default bashrc in
+PowerShell-native syntax — starship, zoxide, and mise activate, plus the
+standard aliases as functions (PowerShell `Set-Alias` cannot attach
+arguments); AI/editor/TUI selections are translated from their bash files into
+`~/.config/powershell/squarebox-selections.ps1` at setup time.
+
+> **Experimental:** the marker file `~/.squarebox-use-zsh`,
+> `~/.squarebox-use-fish`, or `~/.squarebox-use-pwsh` causes `~/.bashrc` to
+> `exec` the chosen shell on every interactive login, so the next shell start
+> picks up the new shell. Set `SQUAREBOX_NO_ZSH=1`, `SQUAREBOX_NO_FISH=1`, or
+> `SQUAREBOX_NO_PWSH=1` to force bash for a single session, or re-run
+> `sqrbx-setup shell` to switch back permanently. Tooling is primarily tested
+> against bash, so a few edge cases may need polish — please file an issue if
+> you hit one. SDK shims are wired into all four shells via
+> `mise activate {bash,zsh,fish,powershell}`.
 
 ### SDKs
 

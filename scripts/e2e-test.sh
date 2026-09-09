@@ -306,6 +306,11 @@ suite_setup_editors() {
 	else
 		tap_fail "3.12c no fish marker for bash selection"
 	fi
+	if [ ! -e ~/.squarebox-use-pwsh ]; then
+		tap_ok "3.12d no pwsh marker for bash selection"
+	else
+		tap_fail "3.12d no pwsh marker for bash selection"
+	fi
 
 	# 4.4 EDITOR set to first selected editor (micro)
 	run_test_grep "4.4 EDITOR set to micro" "micro" cat ~/.squarebox-editor-aliases

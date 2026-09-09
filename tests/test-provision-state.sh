@@ -145,6 +145,30 @@ else
 fi
 rm -f "$BIN/cc" "$STATE/editors" "$STATE/nvim-lazyvim"
 
+# PowerShell reconciles when pwsh or its managed profile is missing from the Box.
+printf 'pwsh\n' > "$STATE/shell"
+if PATH="$BIN" box_reconcile_needed; then
+	ok "missing Box-tier pwsh requires reconciliation"
+else
+	not_ok "missing Box-tier pwsh requires reconciliation"
+fi
+printf '#!/usr/bin/env bash\nexit 0\n' > "$BIN/pwsh"
+chmod +x "$BIN/pwsh"
+if PATH="$BIN" box_reconcile_needed; then
+	ok "pwsh Selection reconciles a missing managed profile"
+else
+	not_ok "pwsh Selection reconciles a missing managed profile"
+fi
+mkdir -p "$HOME_DIR/.config/powershell"
+printf '# squarebox pwsh config (experimental)\n' > "$HOME_DIR/.config/powershell/profile.ps1"
+if PATH="$BIN" box_reconcile_needed; then
+	not_ok "observed pwsh profile needs no reconciliation"
+else
+	ok "observed pwsh profile needs no reconciliation"
+fi
+rm -f "$BIN/pwsh" "$STATE/shell"
+rm -rf "$HOME_DIR/.config/powershell"
+
 # Exercise the real non-interactive reconcile path with a fixture tmux as the
 # observed package and a fixture tool library (this path performs no network).
 FIXTURE_LIB="$TMP/tool-lib.sh"

@@ -91,7 +91,7 @@ Key rules:
 
 - Preserve old Selection on prompt cancellation; intentional empty selection is distinct.
 - Commit Selection/aliases from successful observed installs, not requested values.
-- Keep Bash, Zsh, and Fish derived configuration synchronized after section reruns.
+- Keep Bash, Zsh, Fish, and PowerShell derived configuration synchronized after section reruns.
 - Respect explicit user configuration during migrations (for example tmux mouse off).
 - Runtime APT must work with the read-only timezone mount and show actionable failures.
 - `sqrbx-learn` and its command logger are not shipped in the default v1.1 Box.
@@ -137,9 +137,10 @@ Managed-home volume copies. Bind mounts remain host-managed and are skipped;
 a symlink destination is rejected with a visible startup failure. Never follow
 a persistent-home symlink as root.
 
-Bash is default. Experimental Zsh/Fish are selected with markers in the Managed
-home and must initialize Starship, Zoxide, the `fzf`/`ff` command path, aliases,
-and mise. The packaged Ctrl+R/Ctrl+T/Alt+C/** bindings are a Bash-only contract.
+Bash is default. Experimental Zsh/Fish/PowerShell are selected with markers in
+the Managed home and must initialize Starship, Zoxide, the `fzf`/`ff` command
+path, aliases, and mise. The packaged Ctrl+R/Ctrl+T/Alt+C/** bindings are a
+Bash-only contract.
 
 ## Security posture
 
