@@ -11,7 +11,7 @@ assistants, language SDKs, and an opinionated set of shell aliases. Run the
 same box anywhere (desktop, VPS, or Codespace) and SSH in from your laptop,
 tablet, or phone (please don't).
 
-The goal is multi-faceted: a playground for modern CLI/TUI tools, a Box for
+A playground for modern CLI/TUI tools, a Box for
 running AI agents, and a persistent terminal environment for remote development.
 One-line install, interactive first-run setup, sensible defaults (thanks
 [omarchy](https://omarchy.org)).
